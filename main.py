@@ -116,15 +116,15 @@ print('bla')
 # alphas = np.linspace(0.000001,0.1,1000)
 # #alphas = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] ) * 1e-3
 alphas = np.logspace(-9,1, 200)
-norm_f = [None] * len(alphas)
-norm_data = [None] * len(alphas)
+norm_f = np.zeros(len(alphas))
+norm_data = np.zeros(len(alphas))
 
 for i in range(0, len(alphas)):
 
     reg_img = four_conv * np.conj(fourier_img)/ (alphas[i] * abs(four_L) +  abs(fourier_img)**2)
     x = np. matrix.flatten(reg_img)
     # norm parseval theorem
-    norm_f[i] = np.sqrt( sum(sum( abs(reg_img.conj() * four_L * reg_img))))/256
+    norm_f[i] = np.sqrt( sum(sum( (reg_img.conj() * abs(four_L) * reg_img).real )))/256
     norm_data[i] = np.linalg.norm(ifft2(four_conv - reg_img * fourier_img))
 
 reg_img = four_conv * np.conj(fourier_img) / (alphas[109] * abs(four_L) + abs(fourier_img) ** 2)
@@ -142,14 +142,19 @@ ax.set_yscale('log')
 # print(lambas[::100])
 
 plt.scatter(norm_data, norm_f)
+
+#plot crosses from MTC
+MTCnorms= np.loadtxt('norms.txt')
+plt.scatter(MTCnorms[:,0], MTCnorms[:,1], marker = "x" )
 k = 0
 for i, txt in enumerate(alphas[::5]):
 
 #i = 50
 #txt = alphas[i]
-    ax.annotate(np.around(txt,9), (norm_data[k], norm_f[k]))
+    #ax.annotate(np.around(txt,9), (norm_data[k], norm_f[k]))
     k = k + 5
 # i = 109
 # txt = alphas[i]
 # ax.annotate(np.around(txt,5), (norm_data[i], norm_f[i]))
 plt.show()
+print("bla")
