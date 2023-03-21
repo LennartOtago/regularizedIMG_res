@@ -2,6 +2,8 @@ import numpy as np
 from numpy.fft import fft2, ifft2, fft
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from lcurve_functions import *
+from mpl_toolkits.axes_grid1.inset_locator import mark_inset, zoomed_inset_axes
 import numpy.random as rd
 
 
@@ -129,8 +131,9 @@ for i in range(0, len(alphas)):
 
 reg_img = four_conv * np.conj(fourier_img) / (alphas[109] * abs(four_L) + abs(fourier_img) ** 2)
 c = ifft2(reg_img).real
-plt.imshow(c, cmap='gray')
-plt.show()
+# plt.imshow(c, cmap='gray')
+# plt.show()
+
 
 
 fig2 = plt.figure()
@@ -141,18 +144,28 @@ ax.set_yscale('log')
 # plt.ylim((1e3,1e6))
 # print(lambas[::100])
 
-plt.scatter(norm_data, norm_f)
+plt.plot(norm_data, norm_f,'o', color='black')
 
 #plot crosses from MTC
 MTCnorms= np.loadtxt('norms.txt')
-plt.scatter(MTCnorms[:,0], MTCnorms[:,1], marker = "x" )
+plt.plot(MTCnorms[:,0], MTCnorms[:,1],  marker = "." ,mfc = 'black' , markeredgecolor='r')
 k = 0
-for i, txt in enumerate(alphas[::5]):
+axins = zoomed_inset_axes(ax,30,loc='lower left')
+axins.plot(norm_data, norm_f,'o', color='black')
+axins.plot(MTCnorms[:,0], MTCnorms[:,1], marker = "." ,mfc = 'black' , markeredgecolor='r',markersize=10)
+#axins.scatter(norm_data, norm_f)
 
-#i = 50
-#txt = alphas[i]
-    #ax.annotate(np.around(txt,9), (norm_data[k], norm_f[k]))
-    k = k + 5
+x1, x2, y1, y2 = 5.4e2, 5.6e2, 3.5e4, 3.7e4 # specify the limits
+axins.set_xlim(x1, x2) # apply the x-limits
+axins.set_ylim(y1, y2) # apply the y-limits
+axins.tick_params( bottom=False, left=False, labelbottom = False, labelleft = False)
+
+mark_inset(ax, axins, loc1=1, loc2=4 ,fc="none", ec="0.5")
+#from l_curve in matlab
+k=134
+txt = alphas[k]
+ax.annotate(np.around(txt,6), (norm_data[k]+10, norm_f[k]+10))
+
 # i = 109
 # txt = alphas[i]
 # ax.annotate(np.around(txt,5), (norm_data[i], norm_f[i]))
