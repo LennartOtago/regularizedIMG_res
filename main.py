@@ -117,22 +117,42 @@ print('bla')
 
 # alphas = np.linspace(0.000001,0.1,1000)
 # #alphas = np.array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10] ) * 1e-3
-alphas = np.logspace(-9,1, 200)
+alphas = np.logspace(-10, 1, 200) #np.linspace(0,1e-6, 200)#
 norm_f = np.zeros(len(alphas))
 norm_data = np.zeros(len(alphas))
 
+
 for i in range(0, len(alphas)):
 
-    reg_img = four_conv * np.conj(fourier_img)/ (alphas[i] * abs(four_L) +  abs(fourier_img)**2)
-    x = np. matrix.flatten(reg_img)
+    reg_img = (four_conv * np.conj(fourier_img)/ (alphas[i] * abs(four_L) +  abs(fourier_img)**2))
+    #x = np. matrix.flatten(reg_img)
     # norm parseval theorem
+    # take real part.. think about imaginary part as noise as x.conj * x should be real valued
     norm_f[i] = np.sqrt( sum(sum( (reg_img.conj() * abs(four_L) * reg_img).real )))/256
+
     norm_data[i] = np.linalg.norm(ifft2(four_conv - reg_img * fourier_img))
 
-reg_img = four_conv * np.conj(fourier_img) / (alphas[109] * abs(four_L) + abs(fourier_img) ** 2)
-c = ifft2(reg_img).real
-# plt.imshow(c, cmap='gray')
-# plt.show()
+reg_img = (four_conv * np.conj(fourier_img) / (alphas[109] * abs(four_L) + abs(fourier_img) ** 2))
+# take real value of img as we have real input and need real output
+c = (ifft2(reg_img)).real
+plt.imshow(c, cmap='gray')
+plt.show()
+
+
+fig4 = plt.figure()
+ax4 = fig4.add_subplot()
+ax4.set_xscale('log')
+ax4.set_yscale('log')
+plt.plot(alphas,norm_data)
+
+fig5 = plt.figure()
+ax5 = fig5.add_subplot()
+ax5.set_xscale('log')
+ax5.set_yscale('log')
+plt.plot(alphas,norm_f)
+
+plt.show()
+
 
 
 
@@ -148,11 +168,11 @@ plt.plot(norm_data, norm_f,'o', color='black')
 
 #plot crosses from MTC
 MTCnorms= np.loadtxt('norms.txt')
-plt.plot(MTCnorms[:,0], MTCnorms[:,1],  marker = "." ,mfc = 'black' , markeredgecolor='r')
-k = 0
+plt.plot(MTCnorms[:,0], MTCnorms[:,1],  marker = "." ,mfc = 'black' , markeredgecolor='r',linestyle = 'None')
+#k = 0
 axins = zoomed_inset_axes(ax,30,loc='lower left')
 axins.plot(norm_data, norm_f,'o', color='black')
-axins.plot(MTCnorms[:,0], MTCnorms[:,1], marker = "." ,mfc = 'black' , markeredgecolor='r',markersize=10)
+axins.plot(MTCnorms[:,0], MTCnorms[:,1], marker = "." ,mfc = 'black' , markeredgecolor='r',markersize=10,linestyle = 'None')
 #axins.scatter(norm_data, norm_f)
 
 x1, x2, y1, y2 = 5.4e2, 5.6e2, 3.5e4, 3.7e4 # specify the limits
@@ -164,10 +184,22 @@ mark_inset(ax, axins, loc1=1, loc2=4 ,fc="none", ec="0.5")
 #from l_curve in matlab
 k=134
 txt = alphas[k]
-ax.annotate(np.around(txt,6), (norm_data[k]+10, norm_f[k]+10))
-
+ax.annotate(np.around(txt,6), (norm_data[k]+15, norm_f[k]+15))
+ax.plot(norm_data[k], norm_f[k],  marker = "." ,mfc = 'lime' , markeredgecolor='green',linestyle = 'None',markersize=10)
 # i = 109
 # txt = alphas[i]
 # ax.annotate(np.around(txt,5), (norm_data[i], norm_f[i]))
 plt.show()
+
+
+#plot posterior
+minimizer = norm_data**2 + alphas *  norm_f**2
+fig3 = plt.figure()
+ax = fig3.add_subplot()
+#ax.set_xscale('log')
+#ax.set_yscale('log')
+plt.plot(alphas, minimizer )
+plt.show()
+
+
 print("bla")
